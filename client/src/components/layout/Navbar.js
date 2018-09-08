@@ -1,13 +1,76 @@
 import React, { Component } from "react";
+import { Link } from "react-router-dom";
+import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
+import { logoutUser } from "../../actions/authAction";
 
 class Navbar extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  componentDidMount() {
+    if (this.props.auth.isAuthenticated) {
+      this.props.history.push("/dashboard");
+    }
+  }
+
+  logout(e) {
+    e.preventDefault();
+
+    //logout user
+    this.props.logoutUser(this.props.history);
+  }
+
   render() {
+    const { user, isAuthenticated } = this.props.auth;
+    const guestLinks = (
+      <ul className="navbar-nav ml-auto">
+        <li className="nav-item">
+          <Link className="nav-link" to={"/register"}>
+            Sign Up
+          </Link>
+        </li>
+        <li className="nav-item">
+          <Link className="nav-link" to={"/login"}>
+            Login
+          </Link>
+        </li>
+      </ul>
+    );
+
+    const authLinks = (
+      <ul className="navbar-nav ml-auto">
+        <li className="nav-item">
+          <img
+            className="img-responsive rounded-circle"
+            src={user.avatar}
+            style={{ width: "40px" }}
+          />
+        </li>
+        <li className="nav-item">
+          <a className="nav-link">{user.name}</a>
+        </li>
+        <li className="nav-item">
+          <Link
+            className="nav-link"
+            to={"/logut"}
+            onClick={this.logout.bind(this)}
+          >
+            Logut
+          </Link>
+        </li>
+      </ul>
+    );
+
+    const links = isAuthenticated ? authLinks : guestLinks;
+
     return (
       <nav className="navbar navbar-expand-sm navbar-dark bg-dark mb-4">
         <div className="container">
-          <a className="navbar-brand" href="landing.html">
+          <Link className="navbar-brand" to={"/"}>
             DevConnector
-          </a>
+          </Link>
           <button
             className="navbar-toggler"
             type="button"
@@ -20,25 +83,13 @@ class Navbar extends Component {
           <div className="collapse navbar-collapse" id="mobile-nav">
             <ul className="navbar-nav mr-auto">
               <li className="nav-item">
-                <a className="nav-link" href="profiles.html">
+                <Link className="nav-link" to={"/profiles"}>
                   {" "}
-                  Developers
-                </a>
+                  Developerss
+                </Link>
               </li>
             </ul>
-
-            <ul className="navbar-nav ml-auto">
-              <li className="nav-item">
-                <a className="nav-link" href="register.html">
-                  Sign Up
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="login.html">
-                  Login
-                </a>
-              </li>
-            </ul>
+            {links}
           </div>
         </div>
       </nav>
@@ -46,4 +97,13 @@ class Navbar extends Component {
   }
 }
 
-export default Navbar;
+const mapStateToProps = state => {
+  return {
+    auth: state.auth
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  { logoutUser }
+)(withRouter(Navbar));
